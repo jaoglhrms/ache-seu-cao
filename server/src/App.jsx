@@ -2,7 +2,7 @@ import Navbar from './components/Navbar';
 import Card from './components/Card';
 import { useState, useEffect } from 'react';
 import { useGoogleLogin } from '@react-oauth/google';
-import { Dog, Search, Home, Plus, X, Trash2 } from 'lucide-react'; // Importei o Trash2
+import { Dog, Search, Home, Plus, X, Trash2, LogIn } from 'lucide-react'; // Adicionei LogIn
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -19,9 +19,7 @@ let DefaultIcon = L.icon({
 });
 L.Marker.prototype.options.icon = DefaultIcon;
 
-// --- LISTA DE ADMINS (Coloque seu email aqui) ---
 const ADMIN_EMAILS = ["joaoguilhermegf@gmail.com", "jgnoobgf@gmail.com"]; 
-
 const BAIRROS_PVH = [
   "Aeroclube", "Agenor de Carvalho", "Aponiã", "Areia Branca", "Baixa da União", 
   "Caiari", "Caladinho", "Cascalheira", "Castanheira", "Centro", 
@@ -53,7 +51,6 @@ function App() {
   const [showForm, setShowForm] = useState(false); 
   const [filters, setFilters] = useState({ neighborhood: '', size: '', sex: '' });
   
-  // ESTADO SIMPLES (1 FOTO)
   const [imageFile, setImageFile] = useState(null);
   const [bairroSelection, setBairroSelection] = useState('');
   const [mapPosition, setMapPosition] = useState(null);
@@ -61,9 +58,6 @@ function App() {
     name: '', description: '', contact: '', neighborhood: '', color: '', size: '', sex: '', date: ''
   });
 
-  // Endereço seguro para Windows/Render
-  // SE ESTIVER RODANDO LOCAL: use "http://127.0.0.1:3000"
-  // SE FOR SUBIR PRO GITHUB: use "https://ache-seu-cao-api.onrender.com"
   const API_URL = "https://ache-seu-cao-api.onrender.com"; 
 
   const fetchPets = () => {
@@ -88,11 +82,8 @@ function App() {
   });
 
   const handleLogout = () => setUser(null);
-
-  // Verifica se é admin
   const isAdmin = user && ADMIN_EMAILS.includes(user.email);
 
-  // Função de Deletar (Admin)
   const handleDelete = async (id) => {
     if (confirm("TEM CERTEZA que deseja apagar este post?")) {
         try {
@@ -148,7 +139,33 @@ function App() {
         </div>
       </div>
 
-      {user && <button className={`fab-btn ${showForm ? 'close' : ''}`} onClick={() => setShowForm(!showForm)}>{showForm ? <X size={24} /> : <Plus size={24} />}</button>}
+      {/* --- MENSAGEM DE BOAS-VINDAS (Só aparece se NÃO estiver logado) --- */}
+      {!user && (
+        <div className="max-w-3xl mx-auto mt-6 px-4">
+          <div className="bg-orange-50 border border-orange-200 rounded-xl p-6 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left shadow-sm">
+            <div>
+              <h2 className="text-xl font-bold text-orange-800 mb-1">Bem-vindo ao Ache Seu Cão! 🐶</h2>
+              <p className="text-orange-700 text-sm">
+                Encontrou um pet perdido ou está procurando o seu? <br/>
+                Faça login com o Google para <strong>publicar um anúncio</strong> e ajudar a comunidade.
+              </p>
+            </div>
+            <button 
+              onClick={() => login()} 
+              className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-lg font-bold flex items-center gap-2 transition-colors shadow-md whitespace-nowrap"
+            >
+              <LogIn size={20} /> Entrar com Google
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* BOTÃO FLUTUANTE (FAB) - Visível e seguro no celular */}
+      {user && (
+        <button className={`fab-btn ${showForm ? 'close' : ''}`} onClick={() => setShowForm(!showForm)}>
+          {showForm ? <X size={24} /> : <Plus size={24} />}
+        </button>
+      )}
 
       {showForm && user && (
         <div className="form-overlay">
@@ -204,7 +221,6 @@ function App() {
                   location={pet.neighborhood} 
                 />
                 
-                {/* BOTÃO DE DELETAR (SÓ APARECE SE FOR ADMIN) */}
                 {isAdmin && (
                     <button 
                         onClick={() => handleDelete(pet.id)}

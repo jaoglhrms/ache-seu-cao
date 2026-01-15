@@ -10,59 +10,71 @@
   background-color: #f9fafb;
 }
 
-/* --- BOTÃO FLUTUANTE (+) --- */
+/* --- BOTÃO FLUTUANTE (+) MELHORADO --- */
 .fab-btn {
   position: fixed;
-  bottom: 2rem;
+  /* Subi um pouco mais (de 2rem para 5rem no mobile) para não ficar embaixo da barra do navegador */
+  bottom: 2rem; 
   right: 2rem;
-  width: 3.5rem;
-  height: 3.5rem;
+  width: 4rem; /* Botão um pouco maior para toque */
+  height: 4rem;
   background-color: #f97316; /* Laranja */
   color: white;
   border-radius: 9999px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  transition: all 0.3s;
-  z-index: 50;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.1); /* Sombra mais forte */
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Efeito de pulo */
+  z-index: 9999; /* Garante que fique acima de tudo */
   border: none;
   cursor: pointer;
+  border: 4px solid white; /* Borda branca para destacar do fundo */
+}
+
+/* Ajuste específico para Celular */
+@media (max-width: 640px) {
+  .fab-btn {
+    bottom: 1.5rem;
+    right: 1.5rem;
+    width: 3.8rem;
+    height: 3.8rem;
+  }
 }
 
 .fab-btn:hover {
   background-color: #ea580c;
-  transform: scale(1.1);
+  transform: scale(1.1) rotate(90deg); /* Gira levemente ao passar o mouse */
 }
 
 .fab-btn.close {
   background-color: #ef4444; /* Vermelho ao fechar */
-  transform: rotate(45deg);
+  transform: rotate(135deg); /* Vira um X perfeito */
 }
 
 /* --- MODAL / FORMULÁRIO --- */
 .form-overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.6); /* Fundo mais escuro */
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 60;
+  z-index: 10000; /* Acima do botão */
   padding: 1rem;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(5px);
 }
 
 .form-card {
   background: white;
   padding: 1.5rem;
-  border-radius: 1rem;
+  border-radius: 1.5rem;
   width: 100%;
   max-width: 500px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-  animation: slideUp 0.3s ease-out;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  animation: slideUp 0.4s ease-out;
 }
 
 .form-header {
@@ -70,11 +82,13 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
+  border-bottom: 1px solid #f3f4f6;
+  padding-bottom: 0.5rem;
 }
 
 .form-header h3 {
-  font-size: 1.25rem;
-  font-weight: bold;
+  font-size: 1.5rem;
+  font-weight: 800;
   color: #1f2937;
 }
 
@@ -84,7 +98,7 @@
 }
 .map-wrapper {
   height: 200px;
-  border-radius: 0.5rem;
+  border-radius: 1rem;
   overflow: hidden;
   border: 2px solid #e5e7eb;
 }
@@ -102,36 +116,45 @@
 
 input, select, textarea {
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.5rem;
+  padding: 0.8rem;
+  border: 2px solid #e5e7eb; /* Borda mais grossa */
+  border-radius: 0.75rem;
   outline: none;
-  transition: border-color 0.2s;
+  transition: all 0.2s;
   margin-bottom: 0.75rem;
+  background-color: #f9fafb;
+  font-size: 0.95rem;
 }
 
 input:focus, select:focus, textarea:focus {
   border-color: #f97316;
-  ring: 2px solid #f97316;
+  background-color: white;
+  box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
 }
 
 .btn-submit {
   width: 100%;
-  padding: 0.75rem;
+  padding: 1rem;
   background-color: #f97316;
   color: white;
   font-weight: bold;
-  border-radius: 0.5rem;
-  transition: background-color 0.2s;
+  font-size: 1.1rem;
+  border-radius: 0.75rem;
+  transition: transform 0.1s, background-color 0.2s;
+  margin-top: 0.5rem;
 }
 
 .btn-submit:hover {
   background-color: #ea580c;
 }
 
+.btn-submit:active {
+  transform: scale(0.98);
+}
+
 /* Animação */
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(20px); }
+  from { opacity: 0; transform: translateY(40px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
