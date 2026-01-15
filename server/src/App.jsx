@@ -1,5 +1,7 @@
+import Navbar from './components/Navbar';
+import Card from './components/Card';
 import { useState, useEffect } from 'react';
-import { GoogleLogin } from '@react-oauth/google';
+import { GoogleLogin, useGoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from "jwt-decode";
 import { 
   Dog, MapPin, Search, Home, Plus, X, 
@@ -65,7 +67,20 @@ const API_URL = "https://ache-seu-cao-api.onrender.com";
 
   useEffect(() => { fetchPets(); }, [activeTab, filters]);
 
-  const handleLoginSuccess = (res) => setUser(jwtDecode(res.credential));
+  const login = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      try {
+        // Busca os dados do usuário usando o token do Google
+        const res = await fetch(`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${tokenResponse.access_token}`, {
+          headers: { Authorization: `Bearer ${tokenResponse.access_token}`, Accept: 'application/json' }
+        });
+        const data = await res.json();
+        setUser(data); // Salva o usuário no estado
+      } catch (err) {
+        console.error("Erro no login:", err);
+      }
+    },
+  });
   const handleLogout = () => setUser(null);
   const isAdmin = user && ADMIN_EMAILS.includes(user.email);
 
@@ -125,28 +140,19 @@ const API_URL = "https://ache-seu-cao-api.onrender.com";
 
   return (
     <div className="app-container">
-      <header className="app-header">
-        <div className="logo-area">
-          <Dog size={28} color="#fff" />
-          <h1>Ache Seu Cão {isAdmin && <span style={{fontSize:'0.6em', background:'red', padding:'2px 5px', borderRadius:'4px'}}>ADMIN</span>}</h1>
-        </div>
-        
-        {user ? (
-          <div className="user-pill">
-            <span style={{fontSize: '0.8rem', marginRight: '5px', color: '#fff'}}>Olá, {user.given_name}</span>
-            <img src={user.picture} alt="Avatar" />
-            <button onClick={handleLogout}><LogOut size={16} /></button>
-          </div>
-        ) : (
-          <div className="login-prompt-wrapper">
-             {/* O texto é inserido via CSS para ser responsivo */}
-             <div className="login-text"></div>
-             <div className="google-btn-wrapper">
-                <GoogleLogin onSuccess={handleLoginSuccess} type="icon" shape="circle" />
-             </div>
-          </div>
-        )}
-      </header>
+
+      
+      {/* --- AQUI ENTRA O NOVO NAVBAR --- */}
+      {/* Ele substitui todo o antigo <header> */}
+      <Navbar 
+        user={user} 
+        onLogin={() => login()} 
+        onLogout={handleLogout} 
+        onOpenForm={() => setShowForm(true)}
+      />
+      {/* ------------------------------- */}
+
+      <div className="controls-wrapper">
 
       <div className="controls-wrapper">
         <div className="tabs-pills">
@@ -225,42 +231,38 @@ const API_URL = "https://ache-seu-cao-api.onrender.com";
       )}
 
       <div className="content-area">
-        <div className="grid">
-            {pets.length === 0 && <div className="empty-state-screen"><Dog size={48} opacity={0.3}/><p>Nenhum pet aqui.</p></div>}
-            {pets.map(pet => (
-            <div key={pet.id} className={`pet-card ${pet.status === 'resolved' ? 'resolved' : ''}`}>
-                <div className="pet-image-wrapper">
-                    <img src={pet.imageUrl} alt={pet.name} />
-                    {isAdmin && <button onClick={(e) => {e.stopPropagation(); handleDelete(pet.id)}} style={{position: 'absolute', top: 10, left: 10, background: 'white', border: 'none', borderRadius: '50%', width: 30, height: 30, zIndex: 10, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center'}}><Trash2 size={16} color="red" /></button>}
-                    {pet.status === 'resolved' && <div className="overlay-resolved"><CheckCircle size={32}/><span>RESOLVIDO</span></div>}
-                    <div className="badge-type">{pet.type === 'missing' ? 'Perdido' : 'Encontrado'}</div>
-                </div>
-                <div className="card-content">
-                    <div className="card-top">
-                        <div className="location-badge"><MapPin size={12}/> {pet.neighborhood}</div>
-                        {pet.lat && (
-                            <a href={`https://www.google.com/maps?q=${pet.lat},${pet.lng}`} target="_blank" className="map-link" style={{fontSize:'0.7em', color:'#2563eb', textDecoration:'none', fontWeight:'bold', display:'flex', alignItems:'center', gap:'3px', background:'#eff6ff', padding:'2px 6px', borderRadius:'4px'}}>
-                                <Navigation size={10} /> Ver Mapa
-                            </a>
-                        )}
-                    </div>
-                    <h2>{pet.name}</h2>
-                    <p className="pet-desc">{pet.description}</p>
-                    <div className="pet-tags"><span>{pet.size}</span><span>{pet.color}</span><span>{pet.sex}</span></div>
-                    {pet.linkedPostId && <div className="match-alert-box"><AlertTriangle size={16} /><div><strong>Match!</strong><small>#{pet.linkedPostId}</small></div></div>}
-                    <div className="card-actions">
-                        <a href={getWhatsappLink(pet)} target="_blank" className="btn-action whatsapp">
-                            <MessageCircle size={18}/> WhatsApp
-                        </a>
-                        {!pet.linkedPostId && user && pet.status !== 'resolved' && <button onClick={() => openMatchModal(pet)} className="btn-action match"><Search size={18}/> Match</button>}
-                    </div>
-                    {user && user.email === pet.ownerEmail && pet.status !== 'resolved' && <button onClick={() => markAsResolved(pet.id)} className="btn-resolve-text">Marcar como Resolvido</button>}
-                </div>
-            </div>
-            ))}
-        </div>
+    <div className="content-area">
+  </div>
+</div>
+  
+  {/* Novo Grid do Tailwind (Responsivo: 1 coluna no celular, 2 ou 3 no PC) */}
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
+    
+    {/* Caso não tenha pets (Estado Vazio) */}
+    {pets.length === 0 && (
+      <div className="col-span-full flex flex-col items-center justify-center text-gray-500 py-12">
+        <Dog size={64} className="text-gray-300 mb-4" />
+        <p className="text-lg font-medium">Nenhum pet encontrado nesta região.</p>
       </div>
-    </div>
+    )}
+
+    {/* Lista de Pets usando o novo Card */}
+    {pets.map((pet) => (
+      <Card 
+        key={pet.id || pet._id} 
+        name={pet.name}
+        description={pet.description}
+        imageUrl={pet.imageUrl}
+        date={pet.date || pet.createdAt}
+        contact={pet.contact}
+        location={pet.neighborhood}
+      />
+    ))}
+
+  </div>
+</div>
+      </div>
+
   );
 }
 
