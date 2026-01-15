@@ -2,7 +2,7 @@ import Navbar from './components/Navbar';
 import Card from './components/Card';
 import { useState, useEffect } from 'react';
 import { useGoogleLogin } from '@react-oauth/google';
-import { Dog, Search, Home, Plus, X } from 'lucide-react';
+import { Dog, Search, Home, Plus, X, Trash2 } from 'lucide-react'; // Importei o Trash2
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -19,7 +19,22 @@ let DefaultIcon = L.icon({
 });
 L.Marker.prototype.options.icon = DefaultIcon;
 
-const BAIRROS_PVH = ["Centro", "Olaria", "Embratel", "Nova Porto Velho", "Agenor de Carvalho", "Jardim América", "Cohab", "Tancredo Neves", "Caladinho", "Floresta"];
+// --- LISTA DE ADMINS (Coloque seu email aqui) ---
+const ADMIN_EMAILS = ["joaoguilhermegf@gmail.com", "jgnoobgf@gmail.com"]; 
+
+const BAIRROS_PVH = [
+  "Aeroclube", "Agenor de Carvalho", "Aponiã", "Areia Branca", "Baixa da União", 
+  "Caiari", "Caladinho", "Cascalheira", "Castanheira", "Centro", 
+  "Cidade do Lobo", "Cidade Jardim", "Cidade Nova", "Cohab", "Conceição", 
+  "Costa e Silva", "Cunã", "Eldorado", "Eletronorte", "Embratel", 
+  "Escola de Polícia", "Esperança da Comunidade", "Flodoaldo Fontes Pinto", "Floresta", 
+  "Igarapé", "Industrial", "Jardim América", "Jardim Santana", "Juscelino Kubitschek", 
+  "KM-1", "Lagoa", "Lagoinha", "Liberdade", "Marcos Freire", 
+  "Maringá", "Militar", "Mocambo", "Nossa Senhora das Graças", "Nova Esperança", 
+  "Nova Floresta", "Nova Porto Velho", "Olaria", "Panair", "Pantanal", 
+  "Pedrinhas", "Planalto", "Roque", "São Francisco", "São João Bosco", 
+  "São Sebastião", "Socialista", "Tancredo Neves"
+];
 
 function LocationMarker({ position, setPosition }) {
     const map = useMapEvents({
@@ -46,8 +61,10 @@ function App() {
     name: '', description: '', contact: '', neighborhood: '', color: '', size: '', sex: '', date: ''
   });
 
-  // Endereço seguro para Windows
- const API_URL = "https://ache-seu-cao-api.onrender.com";
+  // Endereço seguro para Windows/Render
+  // SE ESTIVER RODANDO LOCAL: use "http://127.0.0.1:3000"
+  // SE FOR SUBIR PRO GITHUB: use "https://ache-seu-cao-api.onrender.com"
+  const API_URL = "https://ache-seu-cao-api.onrender.com"; 
 
   const fetchPets = () => {
     const params = new URLSearchParams({ type: activeTab, ...filters });
@@ -72,6 +89,22 @@ function App() {
 
   const handleLogout = () => setUser(null);
 
+  // Verifica se é admin
+  const isAdmin = user && ADMIN_EMAILS.includes(user.email);
+
+  // Função de Deletar (Admin)
+  const handleDelete = async (id) => {
+    if (confirm("TEM CERTEZA que deseja apagar este post?")) {
+        try {
+            await fetch(`${API_URL}/api/pets/${id}`, { method: 'DELETE' });
+            alert("Post apagado!");
+            fetchPets();
+        } catch (error) {
+            alert("Erro ao apagar.");
+        }
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!imageFile) { alert("Adicione uma foto!"); return; }
@@ -83,7 +116,6 @@ function App() {
     data.append('ownerEmail', user.email);
     data.append('type', activeTab);
     
-    // ENVIA COMO 'image' (SINGULAR)
     data.append('image', imageFile);
 
     try {
@@ -146,7 +178,6 @@ function App() {
             </div>
             <input placeholder="Cor" value={formData.color} onChange={e => setFormData({...formData, color: e.target.value})} required />
             
-            {/* UPLOAD SIMPLES */}
             <label className="file-upload p-4 border-dashed border-2 rounded text-center block mb-3 cursor-pointer">
               <span>📸 Escolher 1 Foto</span>
               <input type="file" accept="image/*" onChange={e => setImageFile(e.target.files[0])} className="hidden" required />
@@ -163,15 +194,27 @@ function App() {
       <div className="content-area max-w-7xl mx-auto px-4 py-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {pets.map((pet) => (
-            <Card 
-              key={pet.id} 
-              name={pet.name} 
-              description={pet.description} 
-              imageUrl={pet.imageUrl} // SINGULAR
-              date={pet.date} 
-              contact={pet.contact} 
-              location={pet.neighborhood} 
-            />
+            <div key={pet.id} className="relative group">
+                <Card 
+                  name={pet.name} 
+                  description={pet.description} 
+                  imageUrl={pet.imageUrl} 
+                  date={pet.date} 
+                  contact={pet.contact} 
+                  location={pet.neighborhood} 
+                />
+                
+                {/* BOTÃO DE DELETAR (SÓ APARECE SE FOR ADMIN) */}
+                {isAdmin && (
+                    <button 
+                        onClick={() => handleDelete(pet.id)}
+                        className="absolute top-2 right-2 bg-red-600 text-white p-2 rounded-full shadow-lg hover:bg-red-700 transition-colors z-10"
+                        title="Apagar Post"
+                    >
+                        <Trash2 size={20} />
+                    </button>
+                )}
+            </div>
           ))}
         </div>
       </div>
