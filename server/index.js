@@ -58,19 +58,15 @@ app.post('/api/pets', upload, async (req, res) => {
   try {
     const { name, description, contact, type, neighborhood, color, size, sex, date, ownerEmail, ownerName } = req.body;
     
-    let imgurLink = '';
-    
-    // Se enviou arquivo, sobe pro Imgur. Se não, usa placeholder.
-    if (req.file) {
-        imgurLink = await uploadToImgur(req.file.buffer);
-    } else {
-        imgurLink = 'https://placehold.co/600x400?text=Sem+Foto';
-    }
+    if (!req.file) return res.status(400).json({ error: 'Imagem obrigatória.' });
+
+    // Converte a imagem para Base64 em vez de subir para o Imgur
+    const base64Image = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
 
     const stmt = db.prepare('INSERT INTO pets (name, description, imageUrl, contact, type, neighborhood, color, size, sex, date, ownerEmail, ownerName) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
-    stmt.run(name, description, imgurLink, contact, type, neighborhood, color, size, sex, date, ownerEmail, ownerName, function(err) {
+    stmt.run(name, description, base64Image, contact, type, neighborhood, color, size, sex, date, ownerEmail, ownerName, function(err) {
       if (err) return res.status(500).json({ error: err.message });
-      res.json({ id: this.lastID, imageUrl: imgurLink });
+      res.json({ id: this.lastID, imageUrl: base64Image });
     });
     stmt.finalize();
 
