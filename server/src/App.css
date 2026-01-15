@@ -1,233 +1,143 @@
-/* client/src/App.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-:root {
-  --primary-missing: #FF6B6B;
-  --primary-found: #4ECDC4;
-  --accent: #FFE66D;
-  --dark: #292F36;
-  --gray: #F7F9FC;
-  --text-main: #333;
-  --shadow: 0 4px 20px rgba(0,0,0,0.08);
-}
-
-body {
-  background-color: var(--gray);
-  margin: 0;
-  font-family: 'Inter', sans-serif;
-  color: var(--text-main);
-  /* Isso garante que a barra de rolagem não desloque o layout */
-  overflow-y: scroll; 
-}
-
-/* --- CENTRALIZAÇÃO PRINCIPAL --- */
+/* --- RESET GERAL --- */
 .app-container {
-  width: 100%;
-  max-width: 1000px; /* Limita a largura para não esticar demais */
-  margin: 0 auto;    /* A MÁGICA: 0 em cima/baixo, AUTO nas laterais (centraliza) */
-  min-height: 100vh;
-  background: #fff;
-  box-shadow: 0 0 50px rgba(0,0,0,0.05); /* Sombra suave nas bordas */
-  position: relative;
   display: flex;
-  flex-direction: column;
+  flex-col: column;
+  min-height: 100vh;
+  background-color: #f9fafb;
 }
 
-/* --- HEADER --- */
-.app-header {
-  background: var(--dark);
+/* --- BOTÃO FLUTUANTE (+) --- */
+.fab-btn {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 3.5rem;
+  height: 3.5rem;
+  background-color: #f97316; /* Laranja */
   color: white;
-  padding: 15px 30px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s;
+  z-index: 50;
+  border: none;
+  cursor: pointer;
+}
+
+.fab-btn:hover {
+  background-color: #ea580c;
+  transform: scale(1.1);
+}
+
+.fab-btn.close {
+  background-color: #ef4444; /* Vermelho ao fechar */
+  transform: rotate(45deg);
+}
+
+/* --- MODAL / FORMULÁRIO --- */
+.form-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 60;
+  padding: 1rem;
+  backdrop-filter: blur(4px);
+}
+
+.form-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  animation: slideUp 0.3s ease-out;
+}
+
+.form-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  /* Garante que o header fique preso dentro do container centralizado */
-  position: sticky; 
-  top: 0;
-  z-index: 100;
+  margin-bottom: 1rem;
 }
 
-.logo-area { display: flex; align-items: center; gap: 12px; }
-.logo-area h1 { margin: 0; font-size: 1.3rem; font-weight: 700; }
-
-.user-pill {
-  background: rgba(255,255,255,0.15);
-  padding: 5px 10px 5px 5px;
-  border-radius: 30px;
-  display: flex; align-items: center; gap: 10px;
-}
-.user-pill img { width: 32px; height: 32px; border-radius: 50%; border: 2px solid white; }
-.user-pill button { background: none; border: none; color: white; cursor: pointer; display: flex; opacity: 0.8; }
-
-/* --- CONTROLES CENTRALIZADOS --- */
-.controls-wrapper {
-  padding: 20px 30px;
-  background: white;
-  border-bottom: 1px solid #f0f0f0;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  /* Centraliza o conteúdo dos filtros visualmente */
-  align-items: center; 
+.form-header h3 {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #1f2937;
 }
 
-@media (min-width: 768px) {
-  .controls-wrapper {
-    flex-direction: row;
-    justify-content: space-between; /* Espalha abas e filtros */
-  }
-}
-
-/* Abas */
-.tabs-pills {
-  background: #f0f0f0;
-  padding: 4px;
-  border-radius: 12px;
-  display: flex;
-  width: 100%;
-  max-width: 350px; /* Tamanho fixo para as abas não ficarem gigantes */
-}
-.tab-btn {
-  flex: 1; border: none; background: none; padding: 10px;
-  border-radius: 10px; font-weight: 600; color: #666; cursor: pointer;
-  display: flex; justify-content: center; align-items: center; gap: 8px; transition: 0.3s;
-}
-.tab-btn.active.missing { background: white; color: var(--primary-missing); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-.tab-btn.active.found { background: white; color: var(--primary-found); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-
-/* Filtros */
-.filters-container { display: flex; justify-content: center; width: 100%; }
-.scroll-filters { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
-.scroll-filters select {
-  padding: 8px 16px; border: 1px solid #ddd; border-radius: 20px;
-  background: white; color: #555; cursor: pointer; outline: none;
-}
-
-/* --- GRID CENTRALIZADA --- */
-.content-area { 
-  padding: 30px; 
-  background: var(--gray); 
-  flex: 1; /* Ocupa o resto da altura disponível */
-}
-
-.grid {
-  display: grid;
-  /* Cria colunas de no mínimo 260px. Se sobrar espaço, centraliza. */
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); 
-  gap: 20px;
-  width: 100%;
-}
-
-/* CARDS */
-.pet-card {
-  background: white; border-radius: 16px; overflow: hidden;
-  box-shadow: var(--shadow); transition: transform 0.2s;
-  display: flex; flex-direction: column;
-}
-.pet-card:hover { transform: translateY(-5px); }
-
-.pet-image-wrapper { position: relative; height: 200px; }
-.pet-image-wrapper img { width: 100%; height: 100%; object-fit: cover; }
-.badge-type {
-  position: absolute; top: 10px; right: 10px;
-  background: rgba(0,0,0,0.6); color: white; padding: 4px 10px;
-  border-radius: 20px; font-size: 0.75rem; font-weight: bold; backdrop-filter: blur(4px);
-}
-
-.card-content { padding: 15px; flex: 1; display: flex; flex-direction: column; }
-.card-top { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.8rem; color: #888; }
-h2 { margin: 0 0 8px 0; font-size: 1.1rem; color: var(--dark); }
-.pet-desc { font-size: 0.9rem; color: #666; margin-bottom: 15px; line-height: 1.4; flex: 1; }
-
-.pet-tags { display: flex; gap: 5px; margin-bottom: 15px; flex-wrap: wrap; }
-.pet-tags span { background: #f0f2f5; color: #555; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; }
-
-.card-actions { display: flex; gap: 8px; margin-top: auto; }
-.btn-action {
-  flex: 1; display: flex; justify-content: center; align-items: center; gap: 5px;
-  padding: 10px; border-radius: 8px; font-weight: 600; font-size: 0.85rem;
-  text-decoration: none; border: none; cursor: pointer; color: white;
-}
-.btn-action.whatsapp { background: #25D366; }
-.btn-action.match { background: var(--accent); color: #5a4a00; }
-
-/* ESTADOS VAZIOS E ESPECIAIS */
-.empty-state-screen {
-  grid-column: 1 / -1; /* Ocupa a largura total da grid */
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  padding: 50px; color: #ccc; gap: 10px; text-align: center;
-}
-.match-alert-box { background: #fff8e1; color: #856404; padding: 10px; border-radius: 6px; font-size: 0.8rem; margin-bottom: 10px; display: flex; align-items: center; gap: 10px;}
-.resolved { filter: grayscale(1); opacity: 0.7; }
-.overlay-resolved { position: absolute; inset: 0; background: rgba(0,0,0,0.5); display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; font-weight: bold; }
-
-/* MODAL E FAB */
-.fab-btn {
-  position: fixed; bottom: 30px; right: calc(50% - 480px); /* Tenta manter perto do container */
-  width: 60px; height: 60px; border-radius: 50%;
-  background: var(--dark); color: white; border: none;
-  box-shadow: 0 5px 20px rgba(0,0,0,0.3);
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; z-index: 200;
-}
-@media (max-width: 1050px) { .fab-btn { right: 20px; } } /* Se a tela for menor, cola na direita */
-
-.modal-overlay, .form-overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(2px);
-  z-index: 300; display: flex; align-items: center; justify-content: center; padding: 20px;
-}
-.form-card, .modal-content {
-  background: white; width: 100%; max-width: 500px;
-  border-radius: 20px; padding: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.2);
-  max-height: 90vh; overflow-y: auto;
-}
-.input-group { display: flex; gap: 10px; margin-bottom: 10px; }
-.input-group.column { flex-direction: column; gap: 5px; }
-input, select, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-.btn-submit { width: 100%; background: var(--dark); color: white; padding: 15px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; }
-.match-list { display: flex; flex-direction: column; gap: 10px; }
-.match-item { display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px solid #eee; border-radius: 10px; cursor: pointer; }
-.match-item:hover { background: #f9f9f9; }
-.match-item img { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; }
-
+/* Mapa dentro do formulário */
 .map-section {
-    margin-bottom: 15px;
+  margin-bottom: 1rem;
 }
 .map-wrapper {
-    height: 200px; /* Altura do mapa no formulário */
-    border-radius: 12px;
-    overflow: hidden;
-    border: 2px solid #eee;
-    margin-top: 5px;
+  height: 200px;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  border: 2px solid #e5e7eb;
 }
 
-/* Aviso para fazer Login */
-.login-prompt-wrapper {
+/* Inputs */
+.input-group {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
 }
 
-.login-text {
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 0.85rem;
-  text-align: right;
-  line-height: 1.2;
-  max-width: 200px;
-  font-weight: 500;
+.input-group.column {
+    flex-direction: column;
 }
 
-/* Em celulares pequenos, encurtamos o texto ou diminuímos a fonte */
-@media (max-width: 600px) {
-  .login-text span {
-    display: none; /* Esconde a parte longa */
-  }
-  .login-text::after {
-    content: "Login para publicar ➜"; /* Texto curto para celular */
-  }
+input, select, textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  outline: none;
+  transition: border-color 0.2s;
+  margin-bottom: 0.75rem;
 }
 
-@media (min-width: 601px) {
-    .login-text::after {
-        content: "Faça login para publicar fotos de cachorros desaparecidos ➜";
-    }
+input:focus, select:focus, textarea:focus {
+  border-color: #f97316;
+  ring: 2px solid #f97316;
+}
+
+.btn-submit {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #f97316;
+  color: white;
+  font-weight: bold;
+  border-radius: 0.5rem;
+  transition: background-color 0.2s;
+}
+
+.btn-submit:hover {
+  background-color: #ea580c;
+}
+
+/* Animação */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Leaflet Fix (Evita mapas cinzas) */
+.leaflet-container {
+    width: 100%;
+    height: 100%;
+    z-index: 1;
 }
