@@ -54,7 +54,8 @@ function App() {
   const [imageFile, setImageFile] = useState(null);
 
   // IMPORTANTE: Mude para o link do Render quando subir, por enquanto use localhost
-  const API_URL = "http://localhost:5000"; 
+  // IMPORTANTE: Link do Backend no Render
+const API_URL = "https://ache-seu-cao-api.onrender.com";
 
   const fetchPets = () => {
     const params = new URLSearchParams({ type: activeTab, ...filters });
